@@ -1,0 +1,9 @@
+{
+	"devDependencies": {
+		"turbo": "^2.10.5",
+		"typescript": "^7.0.2",
+		"@types/node": "^26.1.1",
+		"eslint": "^10.7.0",
+		"prettier": "^3.9.5"
+	}
+}

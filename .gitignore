@@ -1,45 +1,36 @@
-# Dependencies
-node_modules/
-.pnpm-store/
+# dependencies
+node_modules
 
-# Build outputs
-dist/
-build/
-.next/
-out/
-.nuxt/
-.cache/
+# build
+dist
+.next
+coverage
+build
 
-# Environment files
+# env
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
-# Logs
-logs/
+# logs
+logs
 *.log
-npm-debug.log*
-pnpm-debug.log*
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
 
 # IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Turbo
-.turbo/
-
-# Temporary files
-*.tmp
-*.temp
+.vscode/*
+!.vscode/extensions.json
+.idea
 
 # Prisma
-*.db
-*.sqlite
-prisma/*.db
-prisma/*.sqlite
+prisma/dev.db
+prisma/dev.db-journal
+
+# uploads
+public/uploads
+
+# generated
+*.tsbuildinfo

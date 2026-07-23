@@ -1,9 +1,38 @@
 {
-	"devDependencies": {
-		"turbo": "^2.10.5",
-		"typescript": "^7.0.2",
-		"@types/node": "^26.1.1",
-		"eslint": "^10.7.0",
-		"prettier": "^3.9.5"
-	}
+  "name": "@webops/platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Enterprise Website Maintenance & Service Management Platform",
+  "license": "MIT",
+  "packageManager": "pnpm@10.34.4",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "setup": "pnpm install",
+
+    "dev": "pnpm -r --parallel dev",
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter api start:dev",
+
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+
+    "clean": "pnpm -r clean",
+	
+	"bootstrap": "tsx scripts/bootstrap.ts",
+    "setup": "pnpm bootstrap && pnpm install"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  }
 }

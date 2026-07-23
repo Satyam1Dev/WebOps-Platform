@@ -3,7 +3,6 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from './app.module';
-import { PrismaService } from './prisma/prisma.service';
 import { setupSwagger } from './config';
 
 async function bootstrap() {
@@ -48,10 +47,6 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Graceful shutdown for Prisma
-  const prismaService = app.get(PrismaService);
-  await prismaService.enableShutdownHooks(app);
-
   // Swagger Documentation
   setupSwagger(app);
 
@@ -65,10 +60,12 @@ async function bootstrap() {
   console.log('===================================================');
   console.log(`🌍 Environment : ${environment}`);
   console.log(`🚀 Server      : http://localhost:${port}`);
-  console.log(`📡 API         : http://localhost:${port}/${apiPrefix}/v${apiVersion}`);
+  console.log(
+    `📡 API         : http://localhost:${port}/${apiPrefix}/v${apiVersion}`,
+  );
   console.log(`📚 Swagger     : http://localhost:${port}/${apiPrefix}/docs`);
   console.log('===================================================');
   console.log('');
 }
 
-bootstrap();
+void bootstrap();

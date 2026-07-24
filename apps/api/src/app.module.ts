@@ -8,6 +8,7 @@ import { configuration, envValidationSchema } from './config';
 import { PrismaModule } from './prisma/prisma.module';
 
 // Feature Modules
+import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 
 // App
@@ -16,7 +17,9 @@ import { AppService } from './app.service';
 
 @Module({
   imports: [
+    // ============================
     // Global Configuration
+    // ============================
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
@@ -24,14 +27,18 @@ import { AppService } from './app.service';
       validationSchema: envValidationSchema,
     }),
 
+    // ============================
     // Core Infrastructure
+    // ============================
     PrismaModule,
+
     // ============================
     // Feature Modules
     // ============================
     UsersModule,
+    AuthModule,
 
-    // AuthModule,
+    // Future Modules
     // RbacModule,
     // AuditModule,
     // NotificationModule,

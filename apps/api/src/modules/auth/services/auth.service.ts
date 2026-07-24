@@ -1,14 +1,15 @@
 import {
   ConflictException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
-
 import { RegisterDto } from '../dto/register.dto';
+import { LoginDto } from '../dto/login.dto';
 import { RefreshTokenRepository } from '../refresh-token.repository';
 import { UsersRepository } from '../../users/users.repository';
 
@@ -63,7 +64,41 @@ export class AuthService {
       user,
     };
   }
+  async login(dto: LoginDto) {
+    const user = await this.usersRepository.findByEmail(dto.email);
 
+    if (!user) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const passwordValid = await bcrypt.compare(dto.password, user.password);
+
+    if (!passwordValid) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Account is inactive');
+    }
+
+    const accessToken = await this.generateAccessToken(
+      user.id,
+      user.email,
+      user.role,
+    );
+
+    const refreshToken = await this.generateRefreshToken();
+
+    await this.storeRefreshToken(user.id, refreshToken);
+
+    const { password, ...safeUser } = user;
+
+    return {
+      accessToken,
+      refreshToken,
+      user: safeUser,
+    };
+  }
   private async generateAccessToken(
     userId: string,
     email: string,
@@ -85,30 +120,18 @@ export class AuthService {
     return randomUUID() + randomUUID();
   }
 
-  private async storeRefreshToken(
-    userId: string,
-    refreshToken: string,
-  ) {
+  private async storeRefreshToken(userId: string, refreshToken: string) {
     const tokenHash = await bcrypt.hash(refreshToken, 12);
 
     const expiresAt = new Date();
 
-    expiresAt.setDate(
-      expiresAt.getDate() +
-        this.getRefreshTokenLifetimeDays(),
-    );
+    expiresAt.setDate(expiresAt.getDate() + this.getRefreshTokenLifetimeDays());
 
-    await this.refreshTokenRepository.create(
-      userId,
-      tokenHash,
-      expiresAt,
-    );
+    await this.refreshTokenRepository.create(userId, tokenHash, expiresAt);
   }
 
   private getRefreshTokenLifetimeDays() {
-    const value = this.configService.getOrThrow<string>(
-      'jwt.refreshExpiresIn',
-    );
+    const value = this.configService.getOrThrow<string>('jwt.refreshExpiresIn');
 
     if (value.endsWith('d')) {
       return Number(value.replace('d', ''));

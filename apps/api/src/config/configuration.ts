@@ -5,7 +5,7 @@ export default () => ({
     environment: process.env.NODE_ENV || 'development',
     url: process.env.APP_URL || 'http://localhost:3001',
     apiPrefix: process.env.API_PREFIX || 'api',
-    apiVersion: process.env.API_VERSION || '1',
+    apiVersion: process.env.API_VERSION || 'v1',
   },
 
   database: {
@@ -13,9 +13,9 @@ export default () => ({
   },
 
   jwt: {
-    secret: process.env.JWT_SECRET,
+    accessSecret: process.env.JWT_ACCESS_SECRET,
     refreshSecret: process.env.JWT_REFRESH_SECRET,
-    expiresIn: process.env.JWT_EXPIRES_IN || '15m',
+    accessExpiresIn: process.env.JWT_EXPIRES_IN || '15m',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
 

@@ -4,85 +4,43 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { PrismaService } from '../../prisma/prisma.service';
+import * as bcrypt from 'bcrypt';
 
+import { UsersRepository } from './users.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
-import * as bcrypt from 'bcrypt';
-
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   async create(dto: CreateUserDto) {
-    const exists = await this.prisma.user.findUnique({
-      where: {
-        email: dto.email,
-      },
-    });
+    const exists = await this.usersRepository.findByEmail(dto.email);
 
     if (exists) {
       throw new ConflictException('Email already exists');
     }
 
-    const hash = await bcrypt.hash(dto.password, 10);
+    const password = await bcrypt.hash(dto.password, 10);
 
-    return this.prisma.user.create({
-      data: {
-        ...dto,
-        password: hash,
-      },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        phone: true,
-        role: true,
-        isActive: true,
-        emailVerified: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+    return this.usersRepository.create({
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      email: dto.email,
+      phone: dto.phone,
+      password,
+      role: dto.role,
+      isActive: true,
+      emailVerified: false,
     });
   }
 
   async findAll() {
-    return this.prisma.user.findMany({
-      orderBy: {
-        createdAt: 'desc',
-      },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        phone: true,
-        role: true,
-        isActive: true,
-        emailVerified: true,
-        createdAt: true,
-      },
-    });
+    return this.usersRepository.findAll();
   }
 
   async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        phone: true,
-        role: true,
-        isActive: true,
-        emailVerified: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    const user = await this.usersRepository.findById(id);
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -94,33 +52,19 @@ export class UsersService {
   async update(id: string, dto: UpdateUserDto) {
     await this.findOne(id);
 
+    const data: Record<string, unknown> = { ...dto };
+
     if (dto.password) {
-      dto.password = await bcrypt.hash(dto.password, 10);
+      data.password = await bcrypt.hash(dto.password, 10);
     }
 
-    return this.prisma.user.update({
-      where: { id },
-      data: dto,
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        phone: true,
-        role: true,
-        isActive: true,
-        emailVerified: true,
-        updatedAt: true,
-      },
-    });
+    return this.usersRepository.update(id, data);
   }
 
   async remove(id: string) {
     await this.findOne(id);
 
-    await this.prisma.user.delete({
-      where: { id },
-    });
+    await this.usersRepository.delete(id);
 
     return {
       message: 'User deleted successfully',
@@ -128,8 +72,6 @@ export class UsersService {
   }
 
   async findByEmail(email: string) {
-    return this.prisma.user.findUnique({
-      where: { email },
-    });
+    return this.usersRepository.findByEmail(email);
   }
 }

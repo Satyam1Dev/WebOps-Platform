@@ -4,7 +4,8 @@ import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from './app.module';
 import { setupSwagger } from './config';
-
+import { HttpExceptionFilter } from './common';
+import { TransformResponseInterceptor } from './common';
 async function bootstrap() {
   // Create Nest application
   const app = await NestFactory.create(AppModule);
@@ -40,7 +41,8 @@ async function bootstrap() {
       },
     }),
   );
-
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new TransformResponseInterceptor());
   // Enable CORS
   app.enableCors({
     origin: true,
